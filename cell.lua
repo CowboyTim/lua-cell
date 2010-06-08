@@ -123,6 +123,7 @@ C.dump = function(f)
         end
         print("constant nr:",i,",t:",t,",v:",value)
     end
+    print("sp:",sp,",sizetotal:",#(s))
     return ''
 end
 

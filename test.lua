@@ -18,7 +18,8 @@ local function f(a,p,...)
         p = a + p
     end
     local fn = function() return fnup(500) end
-    local rfn = fn()
+    local fn1 = function() return fnup(600) + 10 end
+    local rfn = fn() + fn1()
     if p ~= nil then
         print("OK:",p)
     end

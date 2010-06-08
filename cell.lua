@@ -46,10 +46,12 @@ local function LoadNumber(str, i, size, endianness)
     return math.ldexp(mantissa, exponent - 1023), i + size
 end
 
+local function LoadDebug(s, sp, header)
+end
+
 local function LoadFunction(s, sp, header)
     local header_size, fheader = 0, {}
     header_size            , sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
-    print("header_size:",header_size)
     fheader.source         , sp = substr(s, sp, sp+header_size-2), sp + header_size
     fheader.linedefined    , sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
     fheader.lastlinedefined, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
@@ -58,9 +60,15 @@ local function LoadFunction(s, sp, header)
     fheader.is_vararg      , sp = ord(s,sp, sp), sp + 1
     fheader.maxstacksize   , sp = ord(s,sp, sp), sp + 1
 
-    for k,v in pairs(header) do
-        print("k:",k,",v:",v)
+    local print = function (...) print(fheader.source, unpack(arg)) end 
+
+    for k,v in pairs(fheader) do
+        print("fheader k:",k,",v:",v)
     end
+
+    --[[
+        LoadCode
+    --]]
     local function_code_size, sp = LoadInt(s, sp, header.sizeof_int, header.endianness) 
     print("function_code_size:", function_code_size)
     for i=1, function_code_size do
@@ -79,7 +87,6 @@ local function LoadFunction(s, sp, header)
         print("i:",i, "sp:", sp,"op:", op)
         sp = sp + header.sizeof_inst
     end
-    print("sp:",sp,",sizetotal:",#(s))
 
     --[[
         LoadConstants
@@ -109,8 +116,6 @@ local function LoadFunction(s, sp, header)
         end
         print("constant nr:",i,",t:",t,",v:",value)
     end
-    print("sp:",sp,",sizetotal:",#(s))
-
 
     --[[
         LoadFunctions
@@ -119,8 +124,42 @@ local function LoadFunction(s, sp, header)
     print("nr_functions:", nr_functions)
     for i=1, nr_functions do
         print("loading function nr:",i)
+        local f
         f, sp = LoadFunction(s, sp, header)
     end
+
+    --[[
+        LoadDebug
+    --]]
+
+    --lines
+    fheader.sizelineinfo, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    for i=1,fheader.sizelineinfo do
+        local lineinfo
+        lineinfo, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+        print("lineinfo:", lineinfo)
+    end
+    
+    -- local vars
+    fheader.sizelocvars,  sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    for i=1,fheader.sizelocvars do
+        local varname, startpc, endpc, strsize
+        strsize, sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+        varname, sp = substr(s, sp, sp+strsize-2), sp + strsize
+        startpc, sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+        endpc,   sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+        print("varname:", varname, ",startpc:", startpc, ",endpc:", endpc)
+    end
+
+    -- upvalues
+    fheader.sizeupvalues, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    for i=1,fheader.sizeupvalues do
+        local strsize, str
+        strsize, sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+        str,     sp = substr(s, sp, sp+strsize-2), sp + strsize
+        print("upvalue:", str)
+    end
+
     return '', sp
 end
 
@@ -139,6 +178,9 @@ C.dump = function(f)
         sizeof_lnumber = v[7],
         lnumber_is_int = v[8]
     }
+    for k,v in pairs(header) do
+        print("k:",k,",v:",v)
+    end
 
     local f, sp = LoadFunction(s, 13, header)
 

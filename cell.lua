@@ -117,7 +117,11 @@ local function LoadFunction(s, sp, header)
     --]]
     local nr_functions, sp = LoadInt(s, sp, header.sizeof_int, header.endianness) 
     print("nr_functions:", nr_functions)
-    return ''
+    for i=1, nr_functions do
+        print("loading function nr:",i)
+        f, sp = LoadFunction(s, sp, header)
+    end
+    return '', sp
 end
 
 C.dump = function(f)
@@ -136,7 +140,10 @@ C.dump = function(f)
         lnumber_is_int = v[8]
     }
 
-    return LoadFunction(s, 13, header)
+    local f, sp = LoadFunction(s, 13, header)
+
+    print("sp:",sp,",sizetotal:",#(s))
+    return f
 end
 
 

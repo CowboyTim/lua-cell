@@ -16,7 +16,7 @@ local function get_bit(byte, bit)
     return byte % 2^(bit+1) >= 2^bit and 1 or 0
 end
 
-local function decode(str, i, size, endianness)
+local function LoadInt(str, i, size, endianness)
     local block = substr(str, i, i + size - 1)
     local sum = 0
     if endianness ~= 0 then
@@ -29,6 +29,10 @@ local function decode(str, i, size, endianness)
         end
     end
     return sum, i + size
+end
+
+local function LoadNumber(str, i, size, endianness)
+    return substr(str, i, i+size-1), i+size
 end
 
 C.dump = function(f)
@@ -47,11 +51,11 @@ C.dump = function(f)
         lnumber_is_int = v[8]
     }
 
-    local sum             , sp = decode(s, 13, header.sizeof_size_t, header.endianness)
+    local sum             , sp = LoadInt(s, 13, header.sizeof_size_t, header.endianness)
     print("sum:",sum)
     header.source         , sp = substr(s, sp, sp+sum-2), sp + sum
-    header.linedefined    , sp = decode(s, sp, header.sizeof_int, header.endianness)
-    header.lastlinedefined, sp = decode(s, sp, header.sizeof_int, header.endianness)
+    header.linedefined    , sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    header.lastlinedefined, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
     header.nups           , sp = ord(s,sp, sp), sp + 1
     header.nuparams       , sp = ord(s,sp, sp), sp + 1
     header.is_vararg      , sp = ord(s,sp, sp), sp + 1
@@ -60,7 +64,7 @@ C.dump = function(f)
     for k,v in pairs(header) do
         print("k:",k,",v:",v)
     end
-    local function_code_size, sp = decode(s, sp, header.sizeof_int, header.endianness) 
+    local function_code_size, sp = LoadInt(s, sp, header.sizeof_int, header.endianness) 
     print("function_code_size:", function_code_size)
     for i=1, function_code_size do
         local block = substr(s,sp,sp+header.sizeof_inst-1)
@@ -77,6 +81,34 @@ C.dump = function(f)
             get_bit(op,0)
         print("i:",i, "sp:", sp,"op:", op)
         sp = sp + header.sizeof_inst
+    end
+    print("sp:",sp,",sizetotal:",#(s))
+
+    --[[
+        LoadConstants
+    --]]
+    local nr_constants, sp = LoadInt(s, sp, header.sizeof_int, header.endianness) 
+    print("nr_constants:", nr_constants)
+    local t, value
+    for i=1, nr_constants do
+        print("loading constant nr:",i)
+        t, sp = ord(s, sp), sp + 1
+        print("constant nr:",i,",t:",t)
+        if     t == 8 then  -- thread
+        elseif t == 7 then  -- userdata
+        elseif t == 6 then  -- function
+        elseif t == 5 then  -- table
+        elseif t == 4 then  -- string
+            local strsize
+            strsize, sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+            value,     sp = substr(s, sp, sp+strsize-2), sp + strsize
+        elseif t == 3 then  -- number
+            value, sp = LoadNumber(s, sp, header.sizeof_lnumber, header.endianness)
+        elseif t == 2 then  -- lightuserdata
+        elseif t == 1 then  -- boolean
+        elseif t == 0 then  -- nil
+        end
+        print("constant nr:",i,",t:",t,",v:",value)
     end
     return ''
 end

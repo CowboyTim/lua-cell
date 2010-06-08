@@ -13,7 +13,7 @@ local function f(a,p,...)
     if a > 5 then
         p = a * 8
     end
-    for i=6,9 do
+    for i=6,9,2 do
         p = a + p
     end
     return tostring(p)..yyy

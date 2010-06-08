@@ -32,7 +32,18 @@ local function LoadInt(str, i, size, endianness)
 end
 
 local function LoadNumber(str, i, size, endianness)
-    return substr(str, i, i+size-1), i+size
+    local x = substr(str, i, i+size-1)
+    x = endianness and string.reverse(x) or x
+    local mantissa = ord(x, 7) % 16
+    for i=6,1,-1 do 
+        mantissa = mantissa * 256 + ord(x, i) 
+    end
+    local exponent = (ord(x, 8) % 128) * 16 + math.floor(ord(x, 7) / 16)
+    if exponent == 0 then
+        return 0, i + size 
+    end
+    mantissa = (math.ldexp(mantissa, -52) + 1) * (ord(x, 8) > 127 and -1 or 1)
+    return math.ldexp(mantissa, exponent - 1023), i + size
 end
 
 C.dump = function(f)

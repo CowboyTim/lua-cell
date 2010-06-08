@@ -117,7 +117,9 @@ C.dump = function(f)
             value, sp = LoadNumber(s, sp, header.sizeof_lnumber, header.endianness)
         elseif t == 2 then  -- lightuserdata
         elseif t == 1 then  -- boolean
+            value, sp = ord(s, sp) ~= 0, sp + 1
         elseif t == 0 then  -- nil
+            value = nil
         end
         print("constant nr:",i,",t:",t,",v:",value)
     end

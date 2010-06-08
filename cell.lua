@@ -46,31 +46,17 @@ local function LoadNumber(str, i, size, endianness)
     return math.ldexp(mantissa, exponent - 1023), i + size
 end
 
-C.dump = function(f)
-    local s  = dump(f)
-    print(string.hex(s), #(s))
-    local v = {ord(s,5,12)}
-    local header = {
-        signature      = string.hex(substr(s, 1, 4)),
-        luac_version   = v[1],
-        luac_format    = v[2],
-        endianness     = v[3],
-        sizeof_int     = v[4],
-        sizeof_size_t  = v[5],
-        sizeof_inst    = v[6],
-        sizeof_lnumber = v[7],
-        lnumber_is_int = v[8]
-    }
-
-    local sum             , sp = LoadInt(s, 13, header.sizeof_size_t, header.endianness)
-    print("sum:",sum)
-    header.source         , sp = substr(s, sp, sp+sum-2), sp + sum
-    header.linedefined    , sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
-    header.lastlinedefined, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
-    header.nups           , sp = ord(s,sp, sp), sp + 1
-    header.nuparams       , sp = ord(s,sp, sp), sp + 1
-    header.is_vararg      , sp = ord(s,sp, sp), sp + 1
-    header.maxstacksize   , sp = ord(s,sp, sp), sp + 1
+local function LoadFunction(s, sp, header)
+    local header_size, fheader = 0, {}
+    header_size            , sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+    print("header_size:",header_size)
+    fheader.source         , sp = substr(s, sp, sp+header_size-2), sp + header_size
+    fheader.linedefined    , sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    fheader.lastlinedefined, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    fheader.nups           , sp = ord(s,sp, sp), sp + 1
+    fheader.nuparams       , sp = ord(s,sp, sp), sp + 1
+    fheader.is_vararg      , sp = ord(s,sp, sp), sp + 1
+    fheader.maxstacksize   , sp = ord(s,sp, sp), sp + 1
 
     for k,v in pairs(header) do
         print("k:",k,",v:",v)
@@ -124,7 +110,34 @@ C.dump = function(f)
         print("constant nr:",i,",t:",t,",v:",value)
     end
     print("sp:",sp,",sizetotal:",#(s))
+
+
+    --[[
+        LoadFunctions
+    --]]
+    local nr_functions, sp = LoadInt(s, sp, header.sizeof_int, header.endianness) 
+    print("nr_functions:", nr_functions)
     return ''
 end
+
+C.dump = function(f)
+    local s  = dump(f)
+    print(string.hex(s), #(s))
+    local v = {ord(s,5,12)}
+    local header = {
+        signature      = string.hex(substr(s, 1, 4)),
+        luac_version   = v[1],
+        luac_format    = v[2],
+        endianness     = v[3],
+        sizeof_int     = v[4],
+        sizeof_size_t  = v[5],
+        sizeof_inst    = v[6],
+        sizeof_lnumber = v[7],
+        lnumber_is_int = v[8]
+    }
+
+    return LoadFunction(s, 13, header)
+end
+
 
 return C

@@ -10,7 +10,10 @@ glbvar = "aaabbb"
 
 
 local function f(a,p,...) 
-    local p
+    local p1 = 0
+    p1 = p + a
+    return p1
+    --[[
     local yyy = test
     local xxx = tist
     yyy = yyy .. "oo".. xxx
@@ -46,6 +49,7 @@ local function f(a,p,...)
         print(i,a1)
     end
     return tostring(p)..yyy..tostring(rfn)
+    --]]
 end
 print(string.hex(string.dump(f)))
 

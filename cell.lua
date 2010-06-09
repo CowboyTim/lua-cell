@@ -67,16 +67,20 @@ local function LoadFunction(s, sp, header)
     fheader.is_vararg      , sp = LoadChar(s, sp)
     fheader.maxstacksize   , sp = LoadChar(s, sp)
 
-    local print = function (...) print(fheader.source, unpack(arg)) end 
+    local print = function (...) 
+        print((#(fheader.source) > 1 and fheader.source or "<tmp>").."::",unpack(arg)) 
+    end 
 
     for k,v in pairs(fheader) do
         print("fheader k:",k,",v:",v)
     end
 
+    local function_code_size, nr_constants, nr_functions
+
     --[[
         LoadCode
     --]]
-    local function_code_size, sp = LoadInt(s, sp) 
+    function_code_size, sp = LoadInt(s, sp) 
     print("function_code_size:", function_code_size)
     for i=1, function_code_size do
         local block = substr(s,sp,sp+header.sizeof_inst-1)
@@ -98,7 +102,7 @@ local function LoadFunction(s, sp, header)
     --[[
         LoadConstants
     --]]
-    local nr_constants, sp = LoadInt(s, sp) 
+    nr_constants, sp = LoadInt(s, sp) 
     print("nr_constants:", nr_constants)
     local t, value
     for i=1, nr_constants do
@@ -125,7 +129,7 @@ local function LoadFunction(s, sp, header)
     --[[
         LoadFunctions
     --]]
-    local nr_functions, sp = LoadInt(s, sp) 
+    nr_functions, sp = LoadInt(s, sp) 
     print("nr_functions:", nr_functions)
     for i=1, nr_functions do
         print("loading function nr:",i)

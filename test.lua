@@ -4,6 +4,9 @@ require("cell")
 local test = 'aa'
 local tist = 'bb'
 local fnup = function(a) return a + 1 end
+local tbltest = {}
+
+glbvar = "aaabbb"
 
 
 local function f(a,p,...) 
@@ -25,6 +28,22 @@ local function f(a,p,...)
     end
     if a == false then
         print("OK:",p)
+    end
+    if tbltest["uuu"] ~= nil then
+        p = p - 1
+        p = p / 10
+        p = p % 556.6
+    end
+    if glbvar ~= nil then
+        print("ok")
+    end
+    local lvltbl1 = {["yyy"]=5,56,78}
+    local lvltbl2 = {"a1","b1"}
+    for a1,b1 in pairs(lvltbl1) do
+        print(a1,b1)
+    end
+    for i,a1 in pairs(lvltbl2) do
+        print(i,a1)
     end
     return tostring(p)..yyy..tostring(rfn)
 end

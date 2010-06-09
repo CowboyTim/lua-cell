@@ -82,10 +82,11 @@ local function LoadFunction(s, sp, header)
     --]]
     nr_opcodes, sp = LoadInt(s, sp) 
     print("nr_opcodes:", nr_opcodes)
-    local opcode
     for i=1, nr_opcodes do
+        local opcode
         opcode, sp = LoadInt(s, sp, header.sizeof_inst)
-        print("opcode, i:", i, opcode)
+        print("opcode, sp:",string.hex(substr(s, sp-header.sizeof_inst, sp-1)),
+              "i:", i, opcode, opcode % 64)
     end
 
     --[[

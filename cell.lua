@@ -46,9 +46,6 @@ local function LoadNumber(str, i, size, endianness)
     return math.ldexp(mantissa, exponent - 1023), i + size
 end
 
-local function LoadDebug(s, sp, header)
-end
-
 local function LoadFunction(s, sp, header)
     local LoadInt = function(s, sp)
         return LoadInt(s, sp, header.sizeof_int, header.endianness)

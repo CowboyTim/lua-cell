@@ -75,28 +75,17 @@ local function LoadFunction(s, sp, header)
         print("fheader k:",k,",v:",v)
     end
 
-    local function_code_size, nr_constants, nr_functions
+    local nr_opcodes, nr_constants, nr_functions
 
     --[[
         LoadCode
     --]]
-    function_code_size, sp = LoadInt(s, sp) 
-    print("function_code_size:", function_code_size)
-    for i=1, function_code_size do
-        local block = substr(s,sp,sp+header.sizeof_inst-1)
-        print("bl:",#(block), string.hex(block))
-        block = endianness and string.reverse(block) or block
-        print("bl:",#(block), string.hex(block))
-        local op = ord(block, 4)
-        op = 
-            get_bit(op,5) * 32 +
-            get_bit(op,4) * 16 +
-            get_bit(op,3) *  8 +
-            get_bit(op,2) *  4 +
-            get_bit(op,1) *  2 +
-            get_bit(op,0)
-        print("i:",i, "sp:", sp,"op:", op)
-        sp = sp + header.sizeof_inst
+    nr_opcodes, sp = LoadInt(s, sp) 
+    print("nr_opcodes:", nr_opcodes)
+    local opcode
+    for i=1, nr_opcodes do
+        opcode, sp = LoadInt(s, sp, header.sizeof_inst)
+        print("opcode, i:", i, opcode)
     end
 
     --[[

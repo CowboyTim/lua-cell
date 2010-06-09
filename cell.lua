@@ -107,7 +107,7 @@ local function LoadFunction(s, sp, header)
     local t, value
     for i=1, nr_constants do
         print("loading constant nr:",i)
-        t, sp = ord(s, sp), sp + 1
+        t, sp = LoadChar(s, sp)
         print("constant nr:",i,",t:",t)
         if     t == 8 then  -- thread
         elseif t == 7 then  -- userdata

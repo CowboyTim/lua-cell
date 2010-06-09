@@ -47,19 +47,25 @@ local function LoadNumber(str, i, size, endianness)
 end
 
 local function LoadFunction(s, sp, header)
-    local LoadInt = function(s, sp)
-        return LoadInt(s, sp, header.sizeof_int, header.endianness)
+    local LoadInt = function(s, sp, size)
+        return LoadInt(s, sp, size or header.sizeof_int, header.endianness)
+    end
+    local LoadChar = function(s, sp)
+        return ord(s, sp), sp + 1
+    end
+    local LoadString = function(s, sp)
+        local strsize, sp = LoadInt(s, sp, header.sizeof_size_t)
+        return substr(s, sp, sp + strsize - 2), sp + strsize 
     end
 
-    local header_size, fheader = 0, {}
-    header_size            , sp = LoadInt(s, sp)
-    fheader.source         , sp = substr(s, sp, sp+header_size-2), sp + header_size
+    local fheader = {}
+    fheader.source         , sp = LoadString(s, sp)
     fheader.linedefined    , sp = LoadInt(s, sp)
     fheader.lastlinedefined, sp = LoadInt(s, sp)
-    fheader.nups           , sp = ord(s,sp, sp), sp + 1
-    fheader.nuparams       , sp = ord(s,sp, sp), sp + 1
-    fheader.is_vararg      , sp = ord(s,sp, sp), sp + 1
-    fheader.maxstacksize   , sp = ord(s,sp, sp), sp + 1
+    fheader.nups           , sp = LoadChar(s, sp)
+    fheader.nuparams       , sp = LoadChar(s, sp)
+    fheader.is_vararg      , sp = LoadChar(s, sp)
+    fheader.maxstacksize   , sp = LoadChar(s, sp)
 
     local print = function (...) print(fheader.source, unpack(arg)) end 
 
@@ -104,9 +110,7 @@ local function LoadFunction(s, sp, header)
         elseif t == 6 then  -- function
         elseif t == 5 then  -- table
         elseif t == 4 then  -- string
-            local strsize
-            strsize, sp = LoadInt(s, sp)
-            value,     sp = substr(s, sp, sp+strsize-2), sp + strsize
+            value, sp = LoadString(s, sp)
         elseif t == 3 then  -- number
             value, sp = LoadNumber(s, sp, header.sizeof_lnumber, header.endianness)
         elseif t == 2 then  -- lightuserdata
@@ -144,9 +148,8 @@ local function LoadFunction(s, sp, header)
     -- local vars
     fheader.sizelocvars,  sp = LoadInt(s, sp)
     for i=1,fheader.sizelocvars do
-        local varname, startpc, endpc, strsize
-        strsize, sp = LoadInt(s, sp)
-        varname, sp = substr(s, sp, sp+strsize-2), sp + strsize
+        local varname, startpc, endpc
+        varname, sp = LoadString(s, sp)
         startpc, sp = LoadInt(s, sp)
         endpc,   sp = LoadInt(s, sp)
         print("varname:", varname, ",startpc:", startpc, ",endpc:", endpc)
@@ -155,9 +158,8 @@ local function LoadFunction(s, sp, header)
     -- upvalues
     fheader.sizeupvalues, sp = LoadInt(s, sp)
     for i=1,fheader.sizeupvalues do
-        local strsize, str
-        strsize, sp = LoadInt(s, sp)
-        str,     sp = substr(s, sp, sp+strsize-2), sp + strsize
+        local str
+        str, sp = LoadString(s, sp)
         print("upvalue:", str)
     end
 

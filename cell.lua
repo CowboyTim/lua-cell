@@ -50,11 +50,15 @@ local function LoadDebug(s, sp, header)
 end
 
 local function LoadFunction(s, sp, header)
+    local LoadInt = function(s, sp)
+        return LoadInt(s, sp, header.sizeof_int, header.endianness)
+    end
+
     local header_size, fheader = 0, {}
-    header_size            , sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+    header_size            , sp = LoadInt(s, sp)
     fheader.source         , sp = substr(s, sp, sp+header_size-2), sp + header_size
-    fheader.linedefined    , sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
-    fheader.lastlinedefined, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    fheader.linedefined    , sp = LoadInt(s, sp)
+    fheader.lastlinedefined, sp = LoadInt(s, sp)
     fheader.nups           , sp = ord(s,sp, sp), sp + 1
     fheader.nuparams       , sp = ord(s,sp, sp), sp + 1
     fheader.is_vararg      , sp = ord(s,sp, sp), sp + 1
@@ -69,7 +73,7 @@ local function LoadFunction(s, sp, header)
     --[[
         LoadCode
     --]]
-    local function_code_size, sp = LoadInt(s, sp, header.sizeof_int, header.endianness) 
+    local function_code_size, sp = LoadInt(s, sp) 
     print("function_code_size:", function_code_size)
     for i=1, function_code_size do
         local block = substr(s,sp,sp+header.sizeof_inst-1)
@@ -91,7 +95,7 @@ local function LoadFunction(s, sp, header)
     --[[
         LoadConstants
     --]]
-    local nr_constants, sp = LoadInt(s, sp, header.sizeof_int, header.endianness) 
+    local nr_constants, sp = LoadInt(s, sp) 
     print("nr_constants:", nr_constants)
     local t, value
     for i=1, nr_constants do
@@ -104,7 +108,7 @@ local function LoadFunction(s, sp, header)
         elseif t == 5 then  -- table
         elseif t == 4 then  -- string
             local strsize
-            strsize, sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+            strsize, sp = LoadInt(s, sp)
             value,     sp = substr(s, sp, sp+strsize-2), sp + strsize
         elseif t == 3 then  -- number
             value, sp = LoadNumber(s, sp, header.sizeof_lnumber, header.endianness)
@@ -120,7 +124,7 @@ local function LoadFunction(s, sp, header)
     --[[
         LoadFunctions
     --]]
-    local nr_functions, sp = LoadInt(s, sp, header.sizeof_int, header.endianness) 
+    local nr_functions, sp = LoadInt(s, sp) 
     print("nr_functions:", nr_functions)
     for i=1, nr_functions do
         print("loading function nr:",i)
@@ -133,29 +137,29 @@ local function LoadFunction(s, sp, header)
     --]]
 
     --lines
-    fheader.sizelineinfo, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    fheader.sizelineinfo, sp = LoadInt(s, sp)
     for i=1,fheader.sizelineinfo do
         local lineinfo
-        lineinfo, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+        lineinfo, sp = LoadInt(s, sp)
         print("lineinfo:", lineinfo)
     end
     
     -- local vars
-    fheader.sizelocvars,  sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    fheader.sizelocvars,  sp = LoadInt(s, sp)
     for i=1,fheader.sizelocvars do
         local varname, startpc, endpc, strsize
-        strsize, sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+        strsize, sp = LoadInt(s, sp)
         varname, sp = substr(s, sp, sp+strsize-2), sp + strsize
-        startpc, sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
-        endpc,   sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+        startpc, sp = LoadInt(s, sp)
+        endpc,   sp = LoadInt(s, sp)
         print("varname:", varname, ",startpc:", startpc, ",endpc:", endpc)
     end
 
     -- upvalues
-    fheader.sizeupvalues, sp = LoadInt(s, sp, header.sizeof_int, header.endianness)
+    fheader.sizeupvalues, sp = LoadInt(s, sp)
     for i=1,fheader.sizeupvalues do
         local strsize, str
-        strsize, sp = LoadInt(s, sp, header.sizeof_size_t, header.endianness)
+        strsize, sp = LoadInt(s, sp)
         str,     sp = substr(s, sp, sp+strsize-2), sp + strsize
         print("upvalue:", str)
     end

@@ -46,6 +46,52 @@ local function LoadNumber(str, i, size, endianness)
     return math.ldexp(mantissa, exponent - 1023), i + size
 end
 
+local iABC  = 1
+local iABx  = 2
+local iAsBx = 3
+
+local opcodes = {
+    [0]= -- else the LUA array starts at index 1
+    {  iABC, function(state, a) end },  -- MOVE
+    {  iABx, function(state, a) end },  -- LOADK
+    {  iABC, function(state, a) end },  -- LOADBOOL
+    {  iABC, function(state, a) end },  -- LOADNIL
+    {  iABC, function(state, a) end },  -- GETUPVAL
+    {  iABx, function(state, a) end },  -- GETGLOBAL
+    {  iABC, function(state, a) end },  -- GETTABLE
+    {  iABx, function(state, a) end },  -- SETGLOBAL
+    {  iABC, function(state, a) end },  -- SETUPVAL
+    {  iABC, function(state, a) end },  -- SETTABLE
+    {  iABC, function(state, a) end },  -- NEWTABLE
+    {  iABC, function(state, a) end },  -- SELF
+    {  iABC, function(state, a) end },  -- ADD
+    {  iABC, function(state, a) end },  -- SUB
+    {  iABC, function(state, a) end },  -- MUL
+    {  iABC, function(state, a) end },  -- DIV
+    {  iABC, function(state, a) end },  -- MOD
+    {  iABC, function(state, a) end },  -- POW
+    {  iABC, function(state, a) end },  -- UNM
+    {  iABC, function(state, a) end },  -- NOT
+    {  iABC, function(state, a) end },  -- LEN
+    {  iABC, function(state, a) end },  -- CONCAT
+    { iAsBx, function(state, a) end },  -- JMP
+    {  iABC, function(state, a) end },  -- EQ
+    {  iABC, function(state, a) end },  -- LT
+    {  iABC, function(state, a) end },  -- LE
+    {  iABC, function(state, a) end },  -- TEST
+    {  iABC, function(state, a) end },  -- TESTSET
+    {  iABC, function(state, a) end },  -- CALL
+    {  iABC, function(state, a) end },  -- TAILCALL
+    {  iABC, function(state, a) end },  -- RETURN
+    { iAsBx, function(state, a) end },  -- FORLOOP
+    { iAsBx, function(state, a) end },  -- FORPREP
+    {  iABC, function(state, a) end },  -- TFORLOOP
+    {  iABC, function(state, a) end },  -- SETLIST
+    {  iABC, function(state, a) end },  -- CLOSE
+    {  iABx, function(state, a) end },  -- CLOSURE
+    {  iABC, function(state, a) end },  -- VARARG
+}
+
 local function LoadFunction(s, sp, header)
     local LoadInt = function(s, sp, size)
         return LoadInt(s, sp, size or header.sizeof_int, header.endianness)
@@ -76,6 +122,7 @@ local function LoadFunction(s, sp, header)
     end
 
     local nr_opcodes, nr_constants, nr_functions
+    local state = {}
 
     --[[
         LoadCode
@@ -85,8 +132,18 @@ local function LoadFunction(s, sp, header)
     for i=1, nr_opcodes do
         local opcode
         opcode, sp = LoadInt(s, sp, header.sizeof_inst)
+        local a = math.floor(opcode/2^24)
+        local code = opcode % 64
         print("opcode, sp:",string.hex(substr(s, sp-header.sizeof_inst, sp-1)),
-              "i:", i, opcode, opcode % 64)
+              "i:", i,
+              "32bits:", opcode,
+              "opcode:", code,
+              "a:", a)
+        if     opcodes[code][1] == iABC then
+        elseif opcodes[code][1] == iABx then
+        elseif opcodes[cide][1] == iAsBx then
+        end
+        opcodes[code][2](state, a)
     end
 
     --[[

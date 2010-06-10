@@ -17,16 +17,12 @@ local function get_bit(byte, bit)
 end
 
 local function LoadInt(str, i, size, endianness)
-    local block = substr(str, i, i + size - 1)
+    local x = substr(str, i, i+size-1)
+    x = endianness and string.reverse(x) or x
+    print("LoadInt, i:",i,",size:",size,string.hex(x))
     local sum = 0
-    if endianness ~= 0 then
-        for j = size, 1, -1 do
-          sum = sum * 256 + ord(block, j)
-        end
-    else
-        for j = 1, size, 1 do
-          sum = sum * 256 + ord(block, j)
-        end
+    for j = size, 1, -1 do
+        sum = sum * 256 + ord(x, j)
     end
     return sum, i + size
 end
@@ -34,6 +30,7 @@ end
 local function LoadNumber(str, i, size, endianness)
     local x = substr(str, i, i+size-1)
     x = endianness and string.reverse(x) or x
+    print("LoadNumber, i:",i,",size:",size,string.hex(x))
     local mantissa = ord(x, 7) % 16
     for i=6,1,-1 do 
         mantissa = mantissa * 256 + ord(x, i) 
@@ -132,20 +129,23 @@ local function LoadFunction(s, sp, header)
     for i=1, nr_opcodes do
         local opcode
         opcode, sp = LoadInt(s, sp, header.sizeof_inst)
-        local a = math.floor(opcode/2^24)
-        local code = opcode % 64
+        local code = opcode % (2^6)
+        local a = math.floor(opcode/2^6)%(2^8)
         local b, c
         if     opcodes[code][1] == iABC  then
-            b = (math.floor(opcode / 2^(6+9)))%(2^9)
-            c = (math.floor(opcode / 2^6))%(2^9)
+            print("iABC!!")
+            c = (math.floor(opcode / 2^(6+8)))%(2^9)
+            b = (math.floor(opcode / 2^(6+8+9)))%(2^9)
         elseif opcodes[code][1] == iABx  then
-            b = (math.floor(opcode / 2^6))%(2^18)
+            print("iABx!!")
+            b = (math.floor(opcode / 2^(6+8)))%(2^(9+9))
         elseif opcodes[code][1] == iAsBx then
-            b = (math.floor(opcode / 2^6))%(2^18)
+            print("iAsBx!!")
+            b = (math.floor(opcode / 2^(6+8)))%(2^(9+9))
         end
-        print("opcode, sp:",string.hex(substr(s, sp-header.sizeof_inst, sp-1)),
+        print("opcode",
               "i:", i, "32bits:", opcode, "opcode:", code,
-              "a:", a, ",b:", b, ",c:", c)
+              "a:"..a..",b:"..b..",c:"..(c or '<nop>'))
         opcodes[code][2](state, a, b, c)
     end
 

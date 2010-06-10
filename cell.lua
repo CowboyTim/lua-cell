@@ -138,10 +138,12 @@ local function LoadFunction(s, sp, header)
             b = (math.floor(opcode / 2^(6+8+9)))%(2^9)
         elseif opcodes[code][1] == iABx  then
             print("iABx!!")
-            b = (math.floor(opcode / 2^(6+8)))%(2^(9+9))
+            --b = (math.floor(opcode / 2^(6+8)))%(2^(9+9))
+            b = math.floor(opcode / 2^(6+8))
         elseif opcodes[code][1] == iAsBx then
             print("iAsBx!!")
-            b = (math.floor(opcode / 2^(6+8)))%(2^(9+9))
+            --b = (math.floor(opcode / 2^(6+8)))%(2^(9+9))
+            b = math.floor(opcode / 2^(6+8))
         end
         print("opcode",
               "i:", i, "32bits:", opcode, "opcode:", code,

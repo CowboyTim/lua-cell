@@ -52,44 +52,44 @@ local iAsBx = 3
 
 local opcodes = {
     [0]= -- else the LUA array starts at index 1
-    {  iABC, function(state, a) end },  -- MOVE
-    {  iABx, function(state, a) end },  -- LOADK
-    {  iABC, function(state, a) end },  -- LOADBOOL
-    {  iABC, function(state, a) end },  -- LOADNIL
-    {  iABC, function(state, a) end },  -- GETUPVAL
-    {  iABx, function(state, a) end },  -- GETGLOBAL
-    {  iABC, function(state, a) end },  -- GETTABLE
-    {  iABx, function(state, a) end },  -- SETGLOBAL
-    {  iABC, function(state, a) end },  -- SETUPVAL
-    {  iABC, function(state, a) end },  -- SETTABLE
-    {  iABC, function(state, a) end },  -- NEWTABLE
-    {  iABC, function(state, a) end },  -- SELF
-    {  iABC, function(state, a) end },  -- ADD
-    {  iABC, function(state, a) end },  -- SUB
-    {  iABC, function(state, a) end },  -- MUL
-    {  iABC, function(state, a) end },  -- DIV
-    {  iABC, function(state, a) end },  -- MOD
-    {  iABC, function(state, a) end },  -- POW
-    {  iABC, function(state, a) end },  -- UNM
-    {  iABC, function(state, a) end },  -- NOT
-    {  iABC, function(state, a) end },  -- LEN
-    {  iABC, function(state, a) end },  -- CONCAT
-    { iAsBx, function(state, a) end },  -- JMP
-    {  iABC, function(state, a) end },  -- EQ
-    {  iABC, function(state, a) end },  -- LT
-    {  iABC, function(state, a) end },  -- LE
-    {  iABC, function(state, a) end },  -- TEST
-    {  iABC, function(state, a) end },  -- TESTSET
-    {  iABC, function(state, a) end },  -- CALL
-    {  iABC, function(state, a) end },  -- TAILCALL
-    {  iABC, function(state, a) end },  -- RETURN
-    { iAsBx, function(state, a) end },  -- FORLOOP
-    { iAsBx, function(state, a) end },  -- FORPREP
-    {  iABC, function(state, a) end },  -- TFORLOOP
-    {  iABC, function(state, a) end },  -- SETLIST
-    {  iABC, function(state, a) end },  -- CLOSE
-    {  iABx, function(state, a) end },  -- CLOSURE
-    {  iABC, function(state, a) end },  -- VARARG
+    {  iABC, function(state, a, b, c) end },  -- MOVE
+    {  iABx, function(state, a, b)    end },  -- LOADK
+    {  iABC, function(state, a, b, c) end },  -- LOADBOOL
+    {  iABC, function(state, a, b, c) end },  -- LOADNIL
+    {  iABC, function(state, a, b, c) end },  -- GETUPVAL
+    {  iABx, function(state, a, b)    end },  -- GETGLOBAL
+    {  iABC, function(state, a, b, c) end },  -- GETTABLE
+    {  iABx, function(state, a, b)    end },  -- SETGLOBAL
+    {  iABC, function(state, a, b, c) end },  -- SETUPVAL
+    {  iABC, function(state, a, b, c) end },  -- SETTABLE
+    {  iABC, function(state, a, b, c) end },  -- NEWTABLE
+    {  iABC, function(state, a, b, c) end },  -- SELF
+    {  iABC, function(state, a, b, c) end },  -- ADD
+    {  iABC, function(state, a, b, c) end },  -- SUB
+    {  iABC, function(state, a, b, c) end },  -- MUL
+    {  iABC, function(state, a, b, c) end },  -- DIV
+    {  iABC, function(state, a, b, c) end },  -- MOD
+    {  iABC, function(state, a, b, c) end },  -- POW
+    {  iABC, function(state, a, b, c) end },  -- UNM
+    {  iABC, function(state, a, b, c) end },  -- NOT
+    {  iABC, function(state, a, b, c) end },  -- LEN
+    {  iABC, function(state, a, b, c) end },  -- CONCAT
+    { iAsBx, function(state, a, b)    end },  -- JMP
+    {  iABC, function(state, a, b, c) end },  -- EQ
+    {  iABC, function(state, a, b, c) end },  -- LT
+    {  iABC, function(state, a, b, c) end },  -- LE
+    {  iABC, function(state, a, b, c) end },  -- TEST
+    {  iABC, function(state, a, b, c) end },  -- TESTSET
+    {  iABC, function(state, a, b, c) end },  -- CALL
+    {  iABC, function(state, a, b, c) end },  -- TAILCALL
+    {  iABC, function(state, a, b, c) end },  -- RETURN
+    { iAsBx, function(state, a, b)    end },  -- FORLOOP
+    { iAsBx, function(state, a, b)    end },  -- FORPREP
+    {  iABC, function(state, a, b, c) end },  -- TFORLOOP
+    {  iABC, function(state, a, b, c) end },  -- SETLIST
+    {  iABC, function(state, a, b, c) end },  -- CLOSE
+    {  iABx, function(state, a, b)    end },  -- CLOSURE
+    {  iABC, function(state, a, b, c) end },  -- VARARG
 }
 
 local function LoadFunction(s, sp, header)

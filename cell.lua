@@ -134,16 +134,19 @@ local function LoadFunction(s, sp, header)
         opcode, sp = LoadInt(s, sp, header.sizeof_inst)
         local a = math.floor(opcode/2^24)
         local code = opcode % 64
-        print("opcode, sp:",string.hex(substr(s, sp-header.sizeof_inst, sp-1)),
-              "i:", i,
-              "32bits:", opcode,
-              "opcode:", code,
-              "a:", a)
-        if     opcodes[code][1] == iABC then
-        elseif opcodes[code][1] == iABx then
-        elseif opcodes[cide][1] == iAsBx then
+        local b, c
+        if     opcodes[code][1] == iABC  then
+            b = (math.floor(opcode / 2^(6+9)))%(2^9)
+            c = (math.floor(opcode / 2^6))%(2^9)
+        elseif opcodes[code][1] == iABx  then
+            b = (math.floor(opcode / 2^6))%(2^18)
+        elseif opcodes[code][1] == iAsBx then
+            b = (math.floor(opcode / 2^6))%(2^18)
         end
-        opcodes[code][2](state, a)
+        print("opcode, sp:",string.hex(substr(s, sp-header.sizeof_inst, sp-1)),
+              "i:", i, "32bits:", opcode, "opcode:", code,
+              "a:", a, ",b:", b, ",c:", c)
+        opcodes[code][2](state, a, b, c)
     end
 
     --[[

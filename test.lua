@@ -1,5 +1,10 @@
+#!/usr/bin/lua
+
 require("stringextra")
 require("cell")
+require("spe")
+
+local a = spe.spe_image_open("../cell/spe_simple")
 
 local test = 'aa'
 local tist = 'bb'

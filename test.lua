@@ -45,8 +45,14 @@ local function f(a,p,...)
         print(i,a1)
     end
     return tostring(p)..yyy..tostring(rfn)
-    --]]
 end
+--[[
+local a
+local function f()
+    a = 1
+    return a
+end
+--]]
 print(string.hex(string.dump(f)))
 
 local a = cell.dump(f)

@@ -9,6 +9,7 @@ _G["cell"] = C
 local dump   = string.dump
 local ord    = string.byte
 local substr = string.sub
+local push   = table.insert
 
 require("stringextra")
 
@@ -49,44 +50,44 @@ local iAsBx = 3
 
 local opcodes = {
     [0]= -- else the LUA array starts at index 1
-    {  iABC, function(state, a, b, c) end },  -- MOVE
-    {  iABx, function(state, a, b)    end },  -- LOADK
-    {  iABC, function(state, a, b, c) end },  -- LOADBOOL
-    {  iABC, function(state, a, b, c) end },  -- LOADNIL
-    {  iABC, function(state, a, b, c) end },  -- GETUPVAL
-    {  iABx, function(state, a, b)    end },  -- GETGLOBAL
-    {  iABC, function(state, a, b, c) end },  -- GETTABLE
-    {  iABx, function(state, a, b)    end },  -- SETGLOBAL
-    {  iABC, function(state, a, b, c) end },  -- SETUPVAL
-    {  iABC, function(state, a, b, c) end },  -- SETTABLE
-    {  iABC, function(state, a, b, c) end },  -- NEWTABLE
-    {  iABC, function(state, a, b, c) end },  -- SELF
-    {  iABC, function(state, a, b, c) end },  -- ADD
-    {  iABC, function(state, a, b, c) end },  -- SUB
-    {  iABC, function(state, a, b, c) end },  -- MUL
-    {  iABC, function(state, a, b, c) end },  -- DIV
-    {  iABC, function(state, a, b, c) end },  -- MOD
-    {  iABC, function(state, a, b, c) end },  -- POW
-    {  iABC, function(state, a, b, c) end },  -- UNM
-    {  iABC, function(state, a, b, c) end },  -- NOT
-    {  iABC, function(state, a, b, c) end },  -- LEN
-    {  iABC, function(state, a, b, c) end },  -- CONCAT
-    { iAsBx, function(state, a, b)    end },  -- JMP
-    {  iABC, function(state, a, b, c) end },  -- EQ
-    {  iABC, function(state, a, b, c) end },  -- LT
-    {  iABC, function(state, a, b, c) end },  -- LE
-    {  iABC, function(state, a, b, c) end },  -- TEST
-    {  iABC, function(state, a, b, c) end },  -- TESTSET
-    {  iABC, function(state, a, b, c) end },  -- CALL
-    {  iABC, function(state, a, b, c) end },  -- TAILCALL
-    {  iABC, function(state, a, b, c) end },  -- RETURN
-    { iAsBx, function(state, a, b)    end },  -- FORLOOP
-    { iAsBx, function(state, a, b)    end },  -- FORPREP
-    {  iABC, function(state, a, b, c) end },  -- TFORLOOP
-    {  iABC, function(state, a, b, c) end },  -- SETLIST
-    {  iABC, function(state, a, b, c) end },  -- CLOSE
-    {  iABx, function(state, a, b)    end },  -- CLOSURE
-    {  iABC, function(state, a, b, c) end },  -- VARARG
+    {  iABC, function(state, constants, a, b, c) end },  -- MOVE
+    {  iABx, function(state, constants, a, b)    end },  -- LOADK
+    {  iABC, function(state, constants, a, b, c) end },  -- LOADBOOL
+    {  iABC, function(state, constants, a, b, c) end },  -- LOADNIL
+    {  iABC, function(state, constants, a, b, c) end },  -- GETUPVAL
+    {  iABx, function(state, constants, a, b)    end },  -- GETGLOBAL
+    {  iABC, function(state, constants, a, b, c) end },  -- GETTABLE
+    {  iABx, function(state, constants, a, b)    end },  -- SETGLOBAL
+    {  iABC, function(state, constants, a, b, c) end },  -- SETUPVAL
+    {  iABC, function(state, constants, a, b, c) end },  -- SETTABLE
+    {  iABC, function(state, constants, a, b, c) end },  -- NEWTABLE
+    {  iABC, function(state, constants, a, b, c) end },  -- SELF
+    {  iABC, function(state, constants, a, b, c) end },  -- ADD
+    {  iABC, function(state, constants, a, b, c) end },  -- SUB
+    {  iABC, function(state, constants, a, b, c) end },  -- MUL
+    {  iABC, function(state, constants, a, b, c) end },  -- DIV
+    {  iABC, function(state, constants, a, b, c) end },  -- MOD
+    {  iABC, function(state, constants, a, b, c) end },  -- POW
+    {  iABC, function(state, constants, a, b, c) end },  -- UNM
+    {  iABC, function(state, constants, a, b, c) end },  -- NOT
+    {  iABC, function(state, constants, a, b, c) end },  -- LEN
+    {  iABC, function(state, constants, a, b, c) end },  -- CONCAT
+    { iAsBx, function(state, constants, a, b)    end },  -- JMP
+    {  iABC, function(state, constants, a, b, c) end },  -- EQ
+    {  iABC, function(state, constants, a, b, c) end },  -- LT
+    {  iABC, function(state, constants, a, b, c) end },  -- LE
+    {  iABC, function(state, constants, a, b, c) end },  -- TEST
+    {  iABC, function(state, constants, a, b, c) end },  -- TESTSET
+    {  iABC, function(state, constants, a, b, c) end },  -- CALL
+    {  iABC, function(state, constants, a, b, c) end },  -- TAILCALL
+    {  iABC, function(state, constants, a, b, c) end },  -- RETURN
+    { iAsBx, function(state, constants, a, b)    end },  -- FORLOOP
+    { iAsBx, function(state, constants, a, b)    end },  -- FORPREP
+    {  iABC, function(state, constants, a, b, c) end },  -- TFORLOOP
+    {  iABC, function(state, constants, a, b, c) end },  -- SETLIST
+    {  iABC, function(state, constants, a, b, c) end },  -- CLOSE
+    {  iABx, function(state, constants, a, b)    end },  -- CLOSURE
+    {  iABC, function(state, constants, a, b, c) end },  -- VARARG
 }
 
 local function LoadFunction(s, sp, header)
@@ -119,11 +120,51 @@ local function LoadFunction(s, sp, header)
     end
 
     local nr_opcodes, nr_constants, nr_functions
+
+    -- save *here*: this is the start of the opcodes section
+    local orig_sp = sp
+    nr_opcodes, sp = LoadInt(s, sp)
+
+    --[[
+        LoadConstants
+    --]]
+
+    -- jump to the start of the constants section
+    sp = sp + nr_opcodes*header.sizeof_int
+    nr_constants, sp = LoadInt(s, sp)
+    print("nr_constants:", nr_constants)
+    local constants = {}
+    local t, value
+    for i=1, nr_constants do
+        print("loading constant nr:",i)
+        t, sp = LoadChar(s, sp)
+        print("constant nr:",i,",t:",t)
+        if     t == 8 then  -- thread
+        elseif t == 7 then  -- userdata
+        elseif t == 6 then  -- function
+        elseif t == 5 then  -- table
+        elseif t == 4 then  -- string
+            value, sp = LoadString(s, sp)
+        elseif t == 3 then  -- number
+            value, sp = LoadNumber(s, sp, header.sizeof_lnumber, header.endianness)
+        elseif t == 2 then  -- lightuserdata
+        elseif t == 1 then  -- boolean
+            value, sp = ord(s, sp) ~= 0, sp + 1
+        elseif t == 0 then  -- nil
+            value = nil
+        end
+        print("constant nr:",i,",t:",t,",v:",value)
+        push(constants, value)
+    end
+
     local state = {}
 
     --[[
         LoadCode
     --]]
+
+    -- back to the start of the opcodes section
+    sp, orig_sp = orig_sp, sp
     nr_opcodes, sp = LoadInt(s, sp) 
     print("nr_opcodes:", nr_opcodes)
     for i=1, nr_opcodes do
@@ -148,35 +189,11 @@ local function LoadFunction(s, sp, header)
         print("opcode",
               "i:", i, "32bits:", opcode, "opcode:", code,
               "a:"..a..",b:"..b..",c:"..(c or '<nop>'))
-        opcodes[code][2](state, a, b, c)
+        opcodes[code][2](state, constants, a, b, c)
     end
 
-    --[[
-        LoadConstants
-    --]]
-    nr_constants, sp = LoadInt(s, sp) 
-    print("nr_constants:", nr_constants)
-    local t, value
-    for i=1, nr_constants do
-        print("loading constant nr:",i)
-        t, sp = LoadChar(s, sp)
-        print("constant nr:",i,",t:",t)
-        if     t == 8 then  -- thread
-        elseif t == 7 then  -- userdata
-        elseif t == 6 then  -- function
-        elseif t == 5 then  -- table
-        elseif t == 4 then  -- string
-            value, sp = LoadString(s, sp)
-        elseif t == 3 then  -- number
-            value, sp = LoadNumber(s, sp, header.sizeof_lnumber, header.endianness)
-        elseif t == 2 then  -- lightuserdata
-        elseif t == 1 then  -- boolean
-            value, sp = ord(s, sp) ~= 0, sp + 1
-        elseif t == 0 then  -- nil
-            value = nil
-        end
-        print("constant nr:",i,",t:",t,",v:",value)
-    end
+    -- back to the end of the constants section
+    sp = orig_sp
 
     --[[
         LoadFunctions

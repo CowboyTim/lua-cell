@@ -48,46 +48,86 @@ local iABC  = 1
 local iABx  = 2
 local iAsBx = 3
 
+
+function op_move     (state, constants, a, b, c) end
+function op_loadk    (state, constants, a, b)    end
+function op_loadbool (state, constants, a, b, c) end
+function op_loadnil  (state, constants, a, b, c) end
+function op_getupval (state, constants, a, b, c) end
+function op_getglobal(state, constants, a, b)    end
+function op_gettable (state, constants, a, b, c) end
+function op_setglobal(state, constants, a, b)    end
+function op_setupval (state, constants, a, b, c) end
+function op_settable (state, constants, a, b, c) end
+function op_newtable (state, constants, a, b, c) end
+function op_self     (state, constants, a, b, c) end
+function op_add      (state, constants, a, b, c) end
+function op_sub      (state, constants, a, b, c) end
+function op_mul      (state, constants, a, b, c) end
+function op_div      (state, constants, a, b, c) end
+function op_mod      (state, constants, a, b, c) end
+function op_pow      (state, constants, a, b, c) end
+function op_unm      (state, constants, a, b, c) end
+function op_not      (state, constants, a, b, c) end
+function op_len      (state, constants, a, b, c) end
+function op_concat   (state, constants, a, b, c) end
+function op_jmp      (state, constants, a, b)    end
+function op_eq       (state, constants, a, b, c) end
+function op_lt       (state, constants, a, b, c) end
+function op_le       (state, constants, a, b, c) end
+function op_test     (state, constants, a, b, c) end
+function op_testset  (state, constants, a, b, c) end
+function op_call     (state, constants, a, b, c) end
+function op_tailcall (state, constants, a, b, c) end
+function op_return   (state, constants, a, b, c) end
+function op_forloop  (state, constants, a, b)    end
+function op_forprep  (state, constants, a, b)    end
+function op_tforloop (state, constants, a, b, c) end
+function op_setlist  (state, constants, a, b, c) end
+function op_close    (state, constants, a, b, c) end
+function op_closure  (state, constants, a, b)    end
+function op_vararg   (state, constants, a, b, c) end
+
 local opcodes = {
     [0]= -- else the LUA array starts at index 1
-    {  iABC, function(state, constants, a, b, c) end },  -- MOVE
-    {  iABx, function(state, constants, a, b)    end },  -- LOADK
-    {  iABC, function(state, constants, a, b, c) end },  -- LOADBOOL
-    {  iABC, function(state, constants, a, b, c) end },  -- LOADNIL
-    {  iABC, function(state, constants, a, b, c) end },  -- GETUPVAL
-    {  iABx, function(state, constants, a, b)    end },  -- GETGLOBAL
-    {  iABC, function(state, constants, a, b, c) end },  -- GETTABLE
-    {  iABx, function(state, constants, a, b)    end },  -- SETGLOBAL
-    {  iABC, function(state, constants, a, b, c) end },  -- SETUPVAL
-    {  iABC, function(state, constants, a, b, c) end },  -- SETTABLE
-    {  iABC, function(state, constants, a, b, c) end },  -- NEWTABLE
-    {  iABC, function(state, constants, a, b, c) end },  -- SELF
-    {  iABC, function(state, constants, a, b, c) end },  -- ADD
-    {  iABC, function(state, constants, a, b, c) end },  -- SUB
-    {  iABC, function(state, constants, a, b, c) end },  -- MUL
-    {  iABC, function(state, constants, a, b, c) end },  -- DIV
-    {  iABC, function(state, constants, a, b, c) end },  -- MOD
-    {  iABC, function(state, constants, a, b, c) end },  -- POW
-    {  iABC, function(state, constants, a, b, c) end },  -- UNM
-    {  iABC, function(state, constants, a, b, c) end },  -- NOT
-    {  iABC, function(state, constants, a, b, c) end },  -- LEN
-    {  iABC, function(state, constants, a, b, c) end },  -- CONCAT
-    { iAsBx, function(state, constants, a, b)    end },  -- JMP
-    {  iABC, function(state, constants, a, b, c) end },  -- EQ
-    {  iABC, function(state, constants, a, b, c) end },  -- LT
-    {  iABC, function(state, constants, a, b, c) end },  -- LE
-    {  iABC, function(state, constants, a, b, c) end },  -- TEST
-    {  iABC, function(state, constants, a, b, c) end },  -- TESTSET
-    {  iABC, function(state, constants, a, b, c) end },  -- CALL
-    {  iABC, function(state, constants, a, b, c) end },  -- TAILCALL
-    {  iABC, function(state, constants, a, b, c) end },  -- RETURN
-    { iAsBx, function(state, constants, a, b)    end },  -- FORLOOP
-    { iAsBx, function(state, constants, a, b)    end },  -- FORPREP
-    {  iABC, function(state, constants, a, b, c) end },  -- TFORLOOP
-    {  iABC, function(state, constants, a, b, c) end },  -- SETLIST
-    {  iABC, function(state, constants, a, b, c) end },  -- CLOSE
-    {  iABx, function(state, constants, a, b)    end },  -- CLOSURE
-    {  iABC, function(state, constants, a, b, c) end },  -- VARARG
+    {  iABC, op_move      },  -- MOVE
+    {  iABx, op_loadk     },  -- LOADK
+    {  iABC, op_loadbool  },  -- LOADBOOL
+    {  iABC, op_loadnil   },  -- LOADNIL
+    {  iABC, op_getupval  },  -- GETUPVAL
+    {  iABx, op_getglobal },  -- GETGLOBAL
+    {  iABC, op_gettable  },  -- GETTABLE
+    {  iABx, op_setglobal },  -- SETGLOBAL
+    {  iABC, op_setupval  },  -- SETUPVAL
+    {  iABC, op_settable  },  -- SETTABLE
+    {  iABC, op_newtable  },  -- NEWTABLE
+    {  iABC, op_self      },  -- SELF
+    {  iABC, op_add       },  -- ADD
+    {  iABC, op_sub       },  -- SUB
+    {  iABC, op_mul       },  -- MUL
+    {  iABC, op_div       },  -- DIV
+    {  iABC, op_mod       },  -- MOD
+    {  iABC, op_pow       },  -- POW
+    {  iABC, op_unm       },  -- UNM
+    {  iABC, op_not       },  -- NOT
+    {  iABC, op_len       },  -- LEN
+    {  iABC, op_concat    },  -- CONCAT
+    { iAsBx, op_jmp       },  -- JMP
+    {  iABC, op_eq        },  -- EQ
+    {  iABC, op_lt        },  -- LT
+    {  iABC, op_le        },  -- LE
+    {  iABC, op_test      },  -- TEST
+    {  iABC, op_testset   },  -- TESTSET
+    {  iABC, op_call      },  -- CALL
+    {  iABC, op_tailcall  },  -- TAILCALL
+    {  iABC, op_return    },  -- RETURN
+    { iAsBx, op_forloop   },  -- FORLOOP
+    { iAsBx, op_forprep   },  -- FORPREP
+    {  iABC, op_tforloop  },  -- TFORLOOP
+    {  iABC, op_setlist   },  -- SETLIST
+    {  iABC, op_close     },  -- CLOSE
+    {  iABx, op_closure   },  -- CLOSURE
+    {  iABC, op_vararg    },  -- VARARG
 }
 
 local function LoadFunction(s, sp, header)

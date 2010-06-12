@@ -53,6 +53,9 @@ local function f()
     return a
 end
 --]]
+local function f()
+    return 12345
+end
 print(string.hex(string.dump(f)))
 
 local a = cell.dump(f)

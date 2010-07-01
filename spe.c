@@ -1,14 +1,11 @@
-#include <stdio.h>
+#define _GNU_SOURCE
+
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
 #include <libspe2.h>
 
 #include <pthread.h>
 
 #define LUA_LIB
-#include "lua.h"
 #include "lauxlib.h"
 
 static int spe_cache_map = LUA_REFNIL;
@@ -54,7 +51,7 @@ static const luaL_reg Cell[] = {
     { NULL              , NULL             }
 };
 
-LUA_API int luaopen_cell(lua_State *L)
+LUA_API int luaopen_spe(lua_State *L)
 {
     luaL_openlib(L, "spe", Cell, 0);
 

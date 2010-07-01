@@ -9,9 +9,9 @@ MYNAME= spe
 
 # no need to change anything below here except if your gcc/glibc is not
 # standard
-CFLAGS= $(INCS) $(DEFS) $(WARN) -O2 $G -D_FILE_OFFSET_BITS=64 -D_REENTRANT -fPIC
+CFLAGS= $(INCS) $(DEFS) $(WARN) -O2 -D_FILE_OFFSET_BITS=64 -D_REENTRANT -fPIC -shared
 INCS= -I$(LUAINC)
-LIBS= -llua5.1 -lpthread -lspe2
+LIBS= -llua5.1 -lpthread
 
 OBJS = spe.so
 
@@ -20,7 +20,7 @@ CC=gcc
 all:    $(OBJS)
 
 %.so:	%.c
-	$(CC) -shared -o $@ $(CFLAGS) $(WARN) $(LIBS) $<
+	$(CC) -o $@ $(CFLAGS) $(WARN) $(LIBS) $< /usr/lib/libspe2.a
 
 clean:
 	rm -f $(OBJS)

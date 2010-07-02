@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <libspe2.h>
 
@@ -10,8 +11,18 @@
 
 static int spe_cache_map = LUA_REFNIL;
 
+void * run(void *spe) {
+    unsigned int          entry       = SPE_DEFAULT_ENTRY;
+    unsigned int          runflags    = 0;
+    void*                 argp        = NULL;
+    void*                 envp        = NULL;
+    spe_stop_info_t       stop_info;
+
+    spe_context_run(spe, &entry, runflags, argp, envp, &stop_info);
+    return NULL;
+}
+
 static int l_spe_image_open(lua_State *L) {
-    int res;
 
     luaL_checktype(L, 1, LUA_TSTRING);
     const char *fn = lua_tostring(L, 1);
@@ -20,7 +31,40 @@ static int l_spe_image_open(lua_State *L) {
     lua_pushlightuserdata(L, program);
     spe_cache_map = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    return res;
+    return 1;
+}
+
+static l_run(lua_State *L) {
+    luaL_checktype(L, 2, LUA_TNUMBER);
+    unsigned int i = lua_tointeger(L, 2);
+
+    spe_context_ptr_t spe = lua_touserdata(L, 1);
+
+    spe_in_mbox_write(spe, &i, 1, SPE_MBOX_ALL_BLOCKING);
+    spe_out_intr_mbox_read(spe, &i, 1, SPE_MBOX_ALL_BLOCKING);
+
+    lua_pushinteger(L, i);
+
+    return 1;
+}
+
+static l_init(lua_State *L) {
+    luaL_checktype(L, 1, LUA_TSTRING);
+    const char *fn = lua_tostring(L, 1);
+
+    pthread_t             runner;
+    unsigned int          createflags = 0;
+
+    spe_program_handle_t* program     = spe_image_open(fn);
+    spe_context_ptr_t     spe         = spe_context_create(createflags, NULL);
+
+    spe_program_load(spe, program);
+
+    lua_pushlightuserdata(L, spe);
+
+    pthread_create(&runner, NULL, run, spe);
+
+    return 1;
 }
 
 static execute(lua_State *L) {
@@ -48,6 +92,8 @@ static execute(lua_State *L) {
 static const luaL_reg Cell[] = {
     { "spe_image_open"  , l_spe_image_open },
     { "execute"         , execute          },
+    { "init"            , l_init           },
+    { "run"             , l_run            },
     { NULL              , NULL             }
 };
 

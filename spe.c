@@ -11,14 +11,20 @@
 
 static int spe_cache_map = LUA_REFNIL;
 
-void * run(void *spe) {
+typedef struct {
+    spe_program_handle_t  *program;
+    spe_context_ptr_t     context;
+    lua_State             *L;
+} spe_state_t;
+
+void * run(void *s) {
     unsigned int          entry       = SPE_DEFAULT_ENTRY;
     unsigned int          runflags    = 0;
     void*                 argp        = NULL;
     void*                 envp        = NULL;
     spe_stop_info_t       stop_info;
 
-    spe_context_run(spe, &entry, runflags, argp, envp, &stop_info);
+    spe_context_run(((spe_state_t *)s)->context, &entry, runflags, argp, envp, &stop_info);
     return NULL;
 }
 
@@ -38,10 +44,10 @@ static l_run(lua_State *L) {
     luaL_checktype(L, 2, LUA_TNUMBER);
     unsigned int i = lua_tointeger(L, 2);
 
-    spe_context_ptr_t spe = lua_touserdata(L, 1);
+    spe_state_t *spe_state = lua_touserdata(L, 1);
 
-    spe_in_mbox_write(spe, &i, 1, SPE_MBOX_ALL_BLOCKING);
-    spe_out_intr_mbox_read(spe, &i, 1, SPE_MBOX_ALL_BLOCKING);
+    spe_in_mbox_write(spe_state->context, &i, 1, SPE_MBOX_ALL_BLOCKING);
+    spe_out_intr_mbox_read(spe_state->context, &i, 1, SPE_MBOX_ALL_BLOCKING);
 
     lua_pushinteger(L, i);
 
@@ -55,14 +61,17 @@ static l_init(lua_State *L) {
     pthread_t             runner;
     unsigned int          createflags = 0;
 
-    spe_program_handle_t* program     = spe_image_open(fn);
-    spe_context_ptr_t     spe         = spe_context_create(createflags, NULL);
+    spe_state_t *spe_state = (spe_state_t *)malloc(sizeof(spe_state_t));
+    spe_state->program = spe_image_open(fn);
+    spe_state->context = spe_context_create(createflags, NULL);
+    spe_state->L       = L;
 
-    spe_program_load(spe, program);
 
-    lua_pushlightuserdata(L, spe);
+    spe_program_load(spe_state->context, spe_state->program);
 
-    pthread_create(&runner, NULL, run, spe);
+    lua_pushlightuserdata(L, spe_state);
+
+    pthread_create(&runner, NULL, run, spe_state);
 
     return 1;
 }

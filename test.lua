@@ -7,11 +7,11 @@ require("spe")
 --local a = spe.spe_image_open("../cell/spe_simple")
 local a = spe.init("./spe_runner")
 print(a)
-for i=1,10000000 do
-    local r = spe.run(a, i)
-    --print(a)
-    --print('result:',r)
-end
+--for i=1,10000000 do
+    local r = spe.run(a, 556)
+    print(a)
+    print('result:',r)
+--end
 
 
 local test = 'aa'

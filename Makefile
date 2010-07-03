@@ -16,11 +16,15 @@ LIBS= -llua5.1 -lpthread
 OBJS = spe.so
 
 CC=gcc
+SPUCC=spu-gcc
 
-all:    $(OBJS)
+all:    $(OBJS) spe_runner
 
 %.so:	%.c
 	$(CC) -o $@ $(CFLAGS) $(WARN) $(LIBS) $< /usr/lib/libspe2.a
+
+spe_runner: spe_runner.c
+	$(SPUCC) -o $@ $<
 
 clean:
 	rm -f $(OBJS)

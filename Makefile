@@ -27,5 +27,5 @@ spe_runner: spe_runner.c
 	$(SPUCC) -o $@ $<
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) spe_runner
 

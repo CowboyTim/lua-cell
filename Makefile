@@ -24,7 +24,8 @@ all:    $(OBJS) spe_runner
 	$(CC) -o $@ $(CFLAGS) $(WARN) $(LIBS) $< /usr/lib/libspe2.a
 
 spe_runner: spe_runner.c
-	$(SPUCC) -o $@ $<
+	$(SPUCC) -o $@ $(INCS) $< /home/tim/lua-5.1.4/src/liblua.a /usr/spu/lib/libm.a
+
 
 clean:
 	rm -f $(OBJS) spe_runner

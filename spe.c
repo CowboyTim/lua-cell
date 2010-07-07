@@ -20,11 +20,10 @@ typedef struct {
 void * run(void *s) {
     unsigned int          entry       = SPE_DEFAULT_ENTRY;
     unsigned int          runflags    = 0;
-    void*                 argp        = NULL;
     void*                 envp        = NULL;
     spe_stop_info_t       stop_info;
 
-    spe_context_run(((spe_state_t *)s)->context, &entry, runflags, argp, envp, &stop_info);
+    spe_context_run(((spe_state_t *)s)->context, &entry, runflags, ((spe_state_t *)s)->L, envp, &stop_info);
     return NULL;
 }
 
@@ -41,15 +40,27 @@ static int l_spe_image_open(lua_State *L) {
 }
 
 static l_run(lua_State *L) {
-    luaL_checktype(L, 2, LUA_TNUMBER);
-    unsigned int i = lua_tointeger(L, 2);
+    spe_state_t           *spe_state = lua_touserdata(L, 1);
+    spe_context_ptr_t     context    = spe_state->context;
 
-    spe_state_t *spe_state = lua_touserdata(L, 1);
+    unsigned int i[2];
+    while(spe_out_intr_mbox_read(context, &i, 2, SPE_MBOX_ALL_BLOCKING) != -1){
 
-    spe_in_mbox_write(spe_state->context, &i, 1, SPE_MBOX_ALL_BLOCKING);
-    spe_out_intr_mbox_read(spe_state->context, &i, 1, SPE_MBOX_ALL_BLOCKING);
+        if(i[0] == 999){
+            break;
+        }
 
-    lua_pushinteger(L, i);
+        fprintf(stderr, "GOT[0]:%d\n", i[0]);
+        fprintf(stderr, "GOT[1]:%d\n", i[1]);
+
+        luaL_checktype(L, i[1], i[0]);
+        unsigned int v = lua_tointeger(L, i[1]);
+
+        spe_in_mbox_write(context, &v, 1, SPE_MBOX_ALL_BLOCKING);
+    }
+
+    spe_out_intr_mbox_read(context, &i, 2, SPE_MBOX_ALL_BLOCKING);
+    lua_pushnumber(L, i[1]);
 
     return 1;
 }

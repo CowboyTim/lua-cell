@@ -44,7 +44,7 @@ static l_run(lua_State *L) {
     spe_context_ptr_t     context    = spe_state->context;
 
     unsigned int i[2];
-    while(spe_out_intr_mbox_read(context, &i, 2, SPE_MBOX_ALL_BLOCKING) != -1){
+    while(spe_out_intr_mbox_read(context, (unsigned int *)&i, 2, SPE_MBOX_ALL_BLOCKING) != -1){
 
         if(i[0] == 999){
             break;
@@ -59,7 +59,7 @@ static l_run(lua_State *L) {
         spe_in_mbox_write(context, &v, 1, SPE_MBOX_ALL_BLOCKING);
     }
 
-    spe_out_intr_mbox_read(context, &i, 2, SPE_MBOX_ALL_BLOCKING);
+    spe_out_intr_mbox_read(context, (unsigned int *)&i, 2, SPE_MBOX_ALL_BLOCKING);
     lua_pushnumber(L, i[1]);
 
     return 1;

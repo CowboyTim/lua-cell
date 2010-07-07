@@ -59,10 +59,14 @@ local function f(a,p,...)
     end
     return tostring(p)..yyy..tostring(rfn)
 end
+local h = {"aaa",["ccc"]="bbb"}
 local a = 7788
 local function f()
-    a = a + 1
-    return a
+    local b = a + 1
+    local c = h
+    local k = "ccc"
+    c = c[k]
+    return b..c
 end
 --[[
 local function f()

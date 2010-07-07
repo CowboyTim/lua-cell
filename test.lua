@@ -59,16 +59,16 @@ local function f(a,p,...)
     end
     return tostring(p)..yyy..tostring(rfn)
 end
---[[
-local a
+local a = 7788
 local function f()
-    a = 1
+    a = a + 1
     return a
 end
---]]
+--[[
 local function f()
     return 12345
 end
+--]]
 print(string.hex(string.dump(f)))
 
 local a = cell.dump(f)

@@ -4,15 +4,6 @@ require("stringextra")
 require("cell")
 require("spe")
 
---local a = spe.spe_image_open("../cell/spe_simple")
-local a = spe.init("./spe_runner")
-print(a)
---for i=1,10000000 do
-    local r = spe.run(a, 556)
-    print(a)
-    print('result:',r)
---end
-
 
 local test = 'aa'
 local tist = 'bb'
@@ -73,7 +64,18 @@ local function f()
     return 12345
 end
 --]]
+
 print(string.hex(string.dump(f)))
 
 local a = cell.dump(f)
 print(string.hex(a))
+
+--local a = spe.spe_image_open("../cell/spe_simple")
+local a = spe.init("./spe_runner")
+print(a)
+--for i=1,10000000 do
+    local r = spe.run(a, f, 556)
+    print(a)
+    print('result:',r)
+--end
+

@@ -8,6 +8,7 @@
 
 #define LUA_LIB
 #include "lauxlib.h"
+#include "lopcodes.h"
 
 static int spe_cache_map = LUA_REFNIL;
 
@@ -53,10 +54,23 @@ static l_run(lua_State *L) {
         fprintf(stderr, "GOT[0]:%d\n", i[0]);
         fprintf(stderr, "GOT[1]:%d\n", i[1]);
 
-        luaL_checktype(L, i[1], i[0]);
-        unsigned int v = lua_tointeger(L, i[1]);
+        void *v;
 
-        spe_in_mbox_write(context, &v, 1, SPE_MBOX_ALL_BLOCKING);
+        if (i[0] == OP_GETUPVAL){
+            fprintf(stderr, "GETUPVAL:%d, %d\n", i[0], i[1]);
+            if(lua_getupvalue(L, -2, i[1]+1) == NULL)
+                fprintf(stderr, "NOK GETUPVAL\n");
+            int t = lua_type(L, -1);
+            fprintf(stderr, "LUA_TYPE:%d\n", t);
+            if (t == LUA_TNUMBER){
+                fprintf(stderr, "LUA_TNUMBER:%d\n", i[0]);
+                unsigned int upv = lua_tointeger(L, -1);
+                v = &upv;
+                lua_pop(L, 1);
+            }
+
+            spe_in_mbox_write(context, v, 1, SPE_MBOX_ALL_BLOCKING);
+        }
     }
 
     spe_out_intr_mbox_read(context, (unsigned int *)&i, 2, SPE_MBOX_ALL_BLOCKING);

@@ -56,19 +56,31 @@ static l_run(lua_State *L) {
 
         void *v;
 
-        if (i[0] == OP_GETUPVAL){
-            fprintf(stderr, "GETUPVAL:%d, %d\n", i[0], i[1]);
-            if(lua_getupvalue(L, -2, i[1]+1) == NULL)
-                fprintf(stderr, "NOK GETUPVAL\n");
-            int t = lua_type(L, -1);
-            fprintf(stderr, "LUA_TYPE:%d\n", t);
-            if (t == LUA_TNUMBER){
-                fprintf(stderr, "LUA_TNUMBER:%d\n", i[0]);
-                unsigned int upv = lua_tointeger(L, -1);
-                v = &upv;
-                lua_pop(L, 1);
+        switch (i[0]) {
+            /* fetch from the LUA VM */
+            case OP_GETUPVAL: {
+                fprintf(stderr, "GETUPVAL:%d, %d\n", i[0], i[1]);
+                if(lua_getupvalue(L, -2, i[1]+1) == NULL)
+                    fprintf(stderr, "NOK GETUPVAL\n");
+            }
+            case OP_GETGLOBAL: {
+                fprintf(stderr, "GETGLOBAL:%d, %d\n", i[0], i[1]);
             }
 
+            /* push */
+            int t = lua_type(L, -1);
+            fprintf(stderr, "LUA_TYPE:%d\n", t);
+            switch (t) {
+                case LUA_TNUMBER: {
+                    fprintf(stderr, "LUA_TNUMBER:%d\n", i[0]);
+                    unsigned int upv = lua_tointeger(L, -1);
+                    v = &upv;
+                }
+                case LUA_TTABLE: {
+                    fprintf(stderr, "LUA_TTABLE:%d\n", i[0]);
+                }
+            }
+            lua_pop(L, 1);
             spe_in_mbox_write(context, v, 1, SPE_MBOX_ALL_BLOCKING);
         }
     }

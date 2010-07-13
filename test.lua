@@ -50,6 +50,8 @@ local function f(a,p,...)
     end
     return tostring(p)..yyy..tostring(rfn)
 end
+someglobal = 5555
+someotherglobal = {["ccc"]=88}
 local h = {"aaa",["ccc"]="bbb"}
 local a = 7788
 local function f()
@@ -57,7 +59,9 @@ local function f()
     local c = h
     local k = "ccc"
     c = c[k]
-    return b..c
+    local l = someglobal
+    l = l + someotherglobal[k]
+    return b..c..tostring(l)
 end
 --[[
 local function f()

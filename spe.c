@@ -59,13 +59,17 @@ static l_run(lua_State *L) {
         switch (i[0]) {
             /* fetch from the LUA VM */
             case OP_GETUPVAL: {
-                fprintf(stderr, "GETUPVAL:%d, %d\n", i[0], i[1]);
+                fprintf(stderr, "OP_GETUPVAL:%d, %d\n", i[0], i[1]);
                 if(lua_getupvalue(L, -2, i[1]+1) == NULL)
                     fprintf(stderr, "NOK GETUPVAL!!!!!!!!!!!!!!!!!!\n");
                 break;
             }
             case OP_GETGLOBAL: {
-                fprintf(stderr, "GETGLOBAL:%d, %d\n", i[0], i[1]);
+                fprintf(stderr, "OP_GETGLOBAL:%d, %d\n", i[0], i[1]);
+                break;
+            }
+            case OP_LOADK: {
+                fprintf(stderr, "OP_LOADK:%d, %d\n", i[0], i[1]);
                 break;
             }
         }
@@ -74,18 +78,42 @@ static l_run(lua_State *L) {
         int t = lua_type(L, -1);
         fprintf(stderr, "LUA_TYPE:%d\n", t);
         switch (t) {
+            case LUA_TNIL: {
+                fprintf(stderr, "LUA_TNIL:%d\n", i[0]);
+                break;
+            }
+            case LUA_TBOOLEAN: {
+                fprintf(stderr, "LUA_TBOOLEAN:%d\n", i[0]);
+                break;
+            }
+            case LUA_TLIGHTUSERDATA: {
+                fprintf(stderr, "LUA_TLIGHTUSERDATA:%d\n", i[0]);
+                break;
+            }
             case LUA_TNUMBER: {
                 fprintf(stderr, "LUA_TNUMBER:%d\n", i[0]);
                 unsigned int upv = lua_tointeger(L, -1);
                 v = &upv;
                 break;
             }
+            case LUA_TSTRING: {
+                fprintf(stderr, "LUA_TSTRING:%d\n", i[0]);
+                break;
+            }
             case LUA_TTABLE: {
                 fprintf(stderr, "LUA_TTABLE:%d\n", i[0]);
                 break;
             }
-            case LUA_TSTRING: {
-                fprintf(stderr, "LUA_TSTRING:%d\n", i[0]);
+            case LUA_TFUNCTION: {
+                fprintf(stderr, "LUA_TFUNCTION:%d\n", i[0]);
+                break;
+            }
+            case LUA_TUSERDATA: {
+                fprintf(stderr, "LUA_TUSERDATA:%d\n", i[0]);
+                break;
+            }
+            case LUA_TTHREAD: {
+                fprintf(stderr, "LUA_TTHREAD:%d\n", i[0]);
                 break;
             }
         }

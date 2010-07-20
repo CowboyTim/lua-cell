@@ -61,7 +61,7 @@ static l_run(lua_State *L) {
             case OP_GETUPVAL: {
                 fprintf(stderr, "GETUPVAL:%d, %d\n", i[0], i[1]);
                 if(lua_getupvalue(L, -2, i[1]+1) == NULL)
-                    fprintf(stderr, "NOK GETUPVAL\n");
+                    fprintf(stderr, "NOK GETUPVAL!!!!!!!!!!!!!!!!!!\n");
             }
             case OP_GETGLOBAL: {
                 fprintf(stderr, "GETGLOBAL:%d, %d\n", i[0], i[1]);

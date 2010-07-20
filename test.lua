@@ -55,13 +55,14 @@ someotherglobal = {["ccc"]=88}
 local h = {"aaa",["ccc"]="bbb"}
 local a = 7788
 local function f()
-    local b = a + 1
+    local b = a + 666666
     local c = h
     local k = "ccc"
+    local kkk = test
     c = c[k]
     local l = someglobal
     l = l + someotherglobal[k]
-    return b..c..tostring(l)
+    return b..c..tostring(l)..test
 end
 --[[
 local function f()

@@ -44,8 +44,8 @@ static l_run(lua_State *L) {
     spe_state_t           *spe_state = lua_touserdata(L, 1);
     spe_context_ptr_t     context    = spe_state->context;
 
-    unsigned int i[4];
-    while(spe_out_intr_mbox_read(context, (unsigned int *)&i, 4, SPE_MBOX_ALL_BLOCKING) != -1){
+    unsigned int i[3];
+    while(spe_out_intr_mbox_read(context, (unsigned int *)&i, 3, SPE_MBOX_ALL_BLOCKING) != -1){
 
         if(i[0] == 999){
             break;
@@ -54,7 +54,6 @@ static l_run(lua_State *L) {
         fprintf(stderr, "GOT[0]:%d\n", i[0]);
         fprintf(stderr, "GOT[1]:%d\n", i[1]);
         fprintf(stderr, "GOT[2]:%d\n", i[2]);
-        fprintf(stderr, "GOT[3]:%d\n", i[3]);
 
         void *v;
 

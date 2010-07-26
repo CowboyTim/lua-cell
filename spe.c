@@ -72,7 +72,7 @@ static l_spe_in_mbox_write(lua_State *L){
     fprintf(stdout, "nr = %d\n", nr);
     int i;
     for(i = 0; i < nr; i++) {
-        d[i] = lua_tointeger(L, i+1); 
+        d[i] = lua_tointeger(L, i+2); 
         fprintf(stdout, "d[%d] = %d\n", i, d[i]);
     }
     spe_in_mbox_write(context, d, nr, SPE_MBOX_ALL_BLOCKING);

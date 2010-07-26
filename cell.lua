@@ -1,18 +1,19 @@
-local C = {}
-
-if _G["cell"] then
+if _G["cell"] ~= nil then
     return _G["cell"]
 end
+
+local C = {}
+
 _G["cell"] = C
 
 require("spe")
+require("stringextra")
 
 local dump   = string.dump
 local ord    = string.byte
 local substr = string.sub
 local push   = table.insert
 
-require("stringextra")
 
 local function get_bit(byte, bit)
     return byte % 2^(bit+1) >= 2^bit and 1 or 0
@@ -208,6 +209,7 @@ local function LoadFunction(s, sp, header)
     sp, orig_sp = orig_sp, sp
     nr_opcodes, sp = LoadInt(s, sp) 
     print("nr_opcodes:", nr_opcodes)
+    local opc = {}
     for i=1, nr_opcodes do
         local opcode
         opcode, sp = LoadInt(s, sp, header.sizeof_inst)
@@ -231,6 +233,7 @@ local function LoadFunction(s, sp, header)
               "i:", i, "32bits:", opcode, "opcode:", code,
               "a:"..a..",b:"..b..",c:"..(c or '<nop>'))
         opcodes[code][2](state, constants, a, b, c)
+        push(opc, {code, a, b, c})
     end
 
     -- back to the end of the constants section
@@ -241,10 +244,12 @@ local function LoadFunction(s, sp, header)
     --]]
     nr_functions, sp = LoadInt(s, sp) 
     print("nr_functions:", nr_functions)
+    local functions = {}
     for i=1, nr_functions do
         print("loading function nr:",i)
         local f
         f, sp = LoadFunction(s, sp, header)
+        push(functions, f)
     end
 
     --[[
@@ -271,18 +276,24 @@ local function LoadFunction(s, sp, header)
 
     -- upvalues
     fheader.sizeupvalues, sp = LoadInt(s, sp)
+    local ups = {}
     for i=1,fheader.sizeupvalues do
         local str
         str, sp = LoadString(s, sp)
         print("upvalue:", str)
+        push(ups, str)
     end
 
-    return '', sp
+    return {
+        ["constants"] = constants,
+        ["opcodes"]   = opc,
+        ["functions"] = functions,
+        ["upvalues"]  = ups,
+    }, sp
 end
 
-C.dump = function(f)
-    local s  = dump(f)
-    print(string.hex(s), #(s))
+function C:new(f)
+    local s = dump(f)
     local v = {ord(s,5,12)}
     local header = {
         signature      = string.hex(substr(s, 1, 4)),
@@ -299,20 +310,29 @@ C.dump = function(f)
         print("k:",k,",v:",v)
     end
 
-    local f, sp = LoadFunction(s, 13, header)
+    local fobj, sp = LoadFunction(s, 13, header)
 
-    print("sp:",sp,",sizetotal:",#(s))
-    return f
+    setmetatable(fobj, self)
+    self.__index = self
+    fobj.header   = header
+    fobj.f        = f
+    fobj.fstr     = s
+
+    return fobj
 end
 
-C.run = function(f)
-    local self = spe.init("./spe_runner")
-    local op, ra, rb = spe.spe_out_intr_mbox_read(self, 3)
+function C:dump(f)
+    return self.fstr
+end
+
+function C:run(f)
+    local spe_c = spe.init("./spe_runner")
+    local op, ra, rb = spe.spe_out_intr_mbox_read(spe_c, 3)
     while op ~= nil do
         print(op, ra, rb)
 
         if op == 999 then
-            local r = spe.spe_out_intr_mbox_read(self, 2)
+            local r = spe.spe_out_intr_mbox_read(spe_c, 2)
             break
         end
 
@@ -320,11 +340,11 @@ C.run = function(f)
         if op == 4 then -- OP_GETUPVAL
             v = 8877
         end
-        spe.spe_in_mbox_write(self, v);
+        spe.spe_in_mbox_write(spe_c, v);
 
-        op, ra, rb = spe.spe_out_intr_mbox_read(self, 3)
+        op, ra, rb = spe.spe_out_intr_mbox_read(spe_c, 3)
     end
-    spe.destroy(self)
+    spe.destroy(spe_c)
     return r
 end
 

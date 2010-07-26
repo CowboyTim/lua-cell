@@ -71,16 +71,9 @@ local function f()
     aa["lll"] = h
     return b..c..tostring(l)..test, pack(someotherglobal)
 end
---[[
-local function f()
-    return 12345
-end
---]]
 
-print(string.hex(string.dump(f)))
-
-local a = cell.dump(f)
-print(string.hex(a))
+local a = cell:new(f)
+print(a:dump())
 
 --[[
 --local a = spe.spe_image_open("../cell/spe_simple")

@@ -40,7 +40,45 @@ static int l_spe_image_open(lua_State *L) {
     return 1;
 }
 
-static l_run(lua_State *L) {
+static l_spe_out_intr_mbox_read(lua_State *L){
+    spe_state_t           *spe_state = lua_touserdata(L, 1);
+    spe_context_ptr_t     context    = spe_state->context;
+
+    unsigned int nr = lua_tointeger(L, 2);
+    unsigned int *d = malloc(sizeof(unsigned int)*nr);
+
+    if(spe_out_intr_mbox_read(context, d, nr, SPE_MBOX_ALL_BLOCKING) != -1){
+        int i;
+        for(i = 0; i < nr; i++) {
+            unsigned int v = *d;
+            fprintf(stdout, "i[%d] = %d\n", i, v);
+            lua_pushinteger(L,(lua_Integer)v);
+            d++;
+        }
+    } else {
+        lua_pushnil(L);
+        return 1;
+    }
+    return nr;
+}
+
+static l_spe_in_mbox_write(lua_State *L){
+    spe_state_t           *spe_state = lua_touserdata(L, 1);
+    spe_context_ptr_t     context    = spe_state->context;
+
+    unsigned int nr = lua_gettop(L) -1;
+    unsigned int *d = malloc(sizeof(unsigned int)*nr);
+    fprintf(stdout, "nr = %d\n", nr);
+    int i;
+    for(i = 0; i < nr; i++) {
+        d[i] = lua_tointeger(L, i+1); 
+        fprintf(stdout, "d[%d] = %d\n", i, d[i]);
+    }
+    spe_in_mbox_write(context, d, nr, SPE_MBOX_ALL_BLOCKING);
+    return 0;
+}
+
+static l_runspe(lua_State *L) {
     spe_state_t           *spe_state = lua_touserdata(L, 1);
     spe_context_ptr_t     context    = spe_state->context;
 
@@ -77,8 +115,14 @@ static l_run(lua_State *L) {
                 fprintf(stderr, "OP_GETTABLE:%d, %d, %d\n", i[0], i[1], i[2]);
                 int t = lua_type(L, i[1]);
                 if (t == LUA_TTABLE){
-                    const char s = "cccccc";
-                    lua_pushlstring(L, &s, 6); 
+                    if(i[2] >= 256){
+                        /* a constant */
+                        i[2] -= 256;
+                        lua_pushstring(L, "cccccc\0"); 
+                    } else {
+                        /* FIXME: just a variable: push */
+                        lua_pushstring(L, "cccccc\0"); 
+                    }
                     lua_gettable(L, i[1]);
                 } else {
                     fprintf(stderr, "OP_GETTABLE:%d, %d, %d NOK!!!!\n", i[0], i[1], i[2]);
@@ -193,11 +237,13 @@ static execute(lua_State *L) {
 }
 
 static const luaL_reg Cell[] = {
-    { "spe_image_open"  , l_spe_image_open },
-    { "execute"         , execute          },
-    { "init"            , l_init           },
-    { "run"             , l_run            },
-    { NULL              , NULL             }
+    { "spe_image_open"         , l_spe_image_open         } ,
+    { "execute"                , execute                  } ,
+    { "init"                   , l_init                   } ,
+    { "runspe"                 , l_runspe                 } ,
+    { "spe_out_intr_mbox_read" , l_spe_out_intr_mbox_read } ,
+    { "spe_in_mbox_write"      , l_spe_in_mbox_write      } ,
+    { NULL                     , NULL                     } 
 };
 
 LUA_API int luaopen_spe(lua_State *L)

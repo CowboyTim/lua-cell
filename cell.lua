@@ -5,6 +5,7 @@ if _G["cell"] then
 end
 _G["cell"] = C
 
+require("spe")
 
 local dump   = string.dump
 local ord    = string.byte
@@ -304,5 +305,19 @@ C.dump = function(f)
     return f
 end
 
+C.run = function(f)
+    local self = spe.init("./spe_runner")
+    local op, ra, rb = spe.spe_out_intr_mbox_read(self, 3)
+    while op ~= nil do
+        print(op, ra, rb)
+        local v
+        if op == 4 then -- OP_GETUPVAL
+            v = 8877
+        end
+        spe.spe_in_mbox_write(self, v);
+
+        op, ra, rb = spe.spe_out_intr_mbox_read(self, 3)
+    end
+end
 
 return C

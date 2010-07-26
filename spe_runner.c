@@ -45,10 +45,22 @@ int main(unsigned long long spe, unsigned long long argp, unsigned long long env
         r3 = spu_read_in_mbox();
         fprintf(stderr, "upval 2: %d\n", r2);
 
-        /*  opcode: 6 (GETTABLE)   a:1,b:1,c:2     */
+        /*  opcode: 6 (GETTABLE)   a:4,b:1,c:2     */
         spu_write_out_intr_mbox(OP_GETTABLE);
         spu_write_out_intr_mbox(r1);
         spu_write_out_intr_mbox(r2);
+        r4 = spu_read_in_mbox();
+
+        /*  opcode: 6 (GETTABLE)   a:4,b:4,c:258   */
+        spu_write_out_intr_mbox(OP_GETTABLE);
+        spu_write_out_intr_mbox(r4);
+        spu_write_out_intr_mbox(258);
+        r4 = spu_read_in_mbox();
+
+        /*  opcode: 6 (GETTABLE)   a:1,b:4,c:259   */
+        spu_write_out_intr_mbox(OP_GETTABLE);
+        spu_write_out_intr_mbox(r4);
+        spu_write_out_intr_mbox(259);
         r1 = spu_read_in_mbox();
 
         /*  opcode: 5 (GETGLOBAL)  a:4,b:2,c:<nop> */

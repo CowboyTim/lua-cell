@@ -54,21 +54,21 @@ local str = "Ole Ola"
 someglobal = 5555
 someotherglobal = {["cccccc"]=88}
 someotherglobal = {["cccccc"]={["aaa"]="Hello World"}}
-local h = {"aaa",["cccccc"]="bbb"}
+local h = {"aaa",["cccccc"]={["bbb"]={["lll"]="uuu"}}}
 local a = 7788
 local function f()
-    local aa = {}
-    aa[k] = h
     local b = a + 666666
     local c = h
     local k = "ccc"
     k = k .. k
     local kkk = test
-    c = c[k]
+    c = c[k].bbb.lll
     local l = someglobal
     l = l + someotherglobal[k]
     l = l .. someotherglobal.ccc.aaa
     local s = str .. tostring(b)
+    local aa = {}
+    aa["lll"] = h
     return b..c..tostring(l)..test, pack(someotherglobal)
 end
 --[[
@@ -82,6 +82,7 @@ print(string.hex(string.dump(f)))
 local a = cell.dump(f)
 print(string.hex(a))
 
+--[[
 --local a = spe.spe_image_open("../cell/spe_simple")
 local a = spe.init("./spe_runner")
 print(a)
@@ -90,4 +91,9 @@ print(a)
     print(a)
     print('result:',r)
 --end
+--]]
+
+local r = cell.run(a, f, 556)
+print(a)
+print('result:',r)
 

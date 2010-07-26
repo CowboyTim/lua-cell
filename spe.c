@@ -13,6 +13,7 @@
 static int spe_cache_map = LUA_REFNIL;
 
 typedef struct {
+    pthread_t             runner;
     spe_program_handle_t  *program;
     spe_context_ptr_t     context;
     lua_State             *L;
@@ -196,7 +197,6 @@ static l_init(lua_State *L) {
     luaL_checktype(L, 1, LUA_TSTRING);
     const char *fn = lua_tostring(L, 1);
 
-    pthread_t             runner;
     unsigned int          createflags = 0;
 
     spe_state_t *spe_state = (spe_state_t *)malloc(sizeof(spe_state_t));
@@ -209,9 +209,20 @@ static l_init(lua_State *L) {
 
     lua_pushlightuserdata(L, spe_state);
 
-    pthread_create(&runner, NULL, run, spe_state);
+    pthread_create(&spe_state->runner, NULL, run, spe_state);
 
     return 1;
+}
+
+static l_destroy(lua_State *L) {
+    spe_state_t           *spe_state = lua_touserdata(L, 1);
+    spe_context_ptr_t     context    = spe_state->context;
+
+    pthread_join(spe_state->runner, NULL);
+
+    spe_image_close(spe_state->program);
+    spe_context_destroy(context);
+    return 0;
 }
 
 static execute(lua_State *L) {
@@ -240,6 +251,7 @@ static const luaL_reg Cell[] = {
     { "spe_image_open"         , l_spe_image_open         } ,
     { "execute"                , execute                  } ,
     { "init"                   , l_init                   } ,
+    { "destroy"                , l_destroy                } ,
     { "runspe"                 , l_runspe                 } ,
     { "spe_out_intr_mbox_read" , l_spe_out_intr_mbox_read } ,
     { "spe_in_mbox_write"      , l_spe_in_mbox_write      } ,

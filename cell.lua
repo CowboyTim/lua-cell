@@ -310,6 +310,12 @@ C.run = function(f)
     local op, ra, rb = spe.spe_out_intr_mbox_read(self, 3)
     while op ~= nil do
         print(op, ra, rb)
+
+        if op == 999 then
+            local r = spe.spe_out_intr_mbox_read(self, 2)
+            break
+        end
+
         local v
         if op == 4 then -- OP_GETUPVAL
             v = 8877
@@ -318,6 +324,8 @@ C.run = function(f)
 
         op, ra, rb = spe.spe_out_intr_mbox_read(self, 3)
     end
+    spe.destroy(self)
+    return r
 end
 
 return C

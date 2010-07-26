@@ -50,19 +50,26 @@ local function f(a,p,...)
     end
     return tostring(p)..yyy..tostring(rfn)
 end
+local str = "Ole Ola"
 someglobal = 5555
-someotherglobal = {["ccc"]=88}
-local h = {"aaa",["ccc"]="bbb"}
+someotherglobal = {["cccccc"]=88}
+someotherglobal = {["cccccc"]={["aaa"]="Hello World"}}
+local h = {"aaa",["cccccc"]="bbb"}
 local a = 7788
 local function f()
+    local aa = {}
+    aa[k] = h
     local b = a + 666666
     local c = h
     local k = "ccc"
+    k = k .. k
     local kkk = test
     c = c[k]
     local l = someglobal
     l = l + someotherglobal[k]
-    return b..c..tostring(l)..test
+    l = l .. someotherglobal.ccc.aaa
+    local s = str .. tostring(b)
+    return b..c..tostring(l)..test, pack(someotherglobal)
 end
 --[[
 local function f()

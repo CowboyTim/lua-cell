@@ -29,6 +29,15 @@ int main(unsigned long long spe, unsigned long long argp, unsigned long long env
         /*  opcode: 1 (LOADK)      a:2,b:1,c:<nop> */
         //r2 = "ccc";
 
+        /*  opcode: 1 (MOVE)       a:3,b:2,c:0     */
+        //r3 = r2;
+
+        /*  opcode: 1 (MOVE)       a:4,b:2,c:0     */
+        //r4 = r2;
+
+        /*  opcode: 1 (CONCAT)     a:2,b:3,c:4     */
+        //r2 = r3 .. r4;
+
         /*  opcode: 4 (GETUPVAL)   a:3,b:2,c:0     */
         spu_write_out_intr_mbox(OP_GETUPVAL);
         spu_write_out_intr_mbox(2);

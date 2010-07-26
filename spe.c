@@ -44,6 +44,10 @@ static l_run(lua_State *L) {
     spe_state_t           *spe_state = lua_touserdata(L, 1);
     spe_context_ptr_t     context    = spe_state->context;
 
+    int funcindex = lua_gettop(L) -1;
+
+    fprintf(stderr, "FUNC indx: %d\n", funcindex);
+
     unsigned int i[3];
     while(spe_out_intr_mbox_read(context, (unsigned int *)&i, 3, SPE_MBOX_ALL_BLOCKING) != -1){
 
@@ -61,12 +65,24 @@ static l_run(lua_State *L) {
             /* fetch from the LUA VM */
             case OP_GETUPVAL: {
                 fprintf(stderr, "OP_GETUPVAL:%d, %d\n", i[0], i[1]);
-                if(lua_getupvalue(L, -2, i[1]+1) == NULL)
+                if(lua_getupvalue(L, funcindex, i[1]+1) == NULL)
                     fprintf(stderr, "NOK GETUPVAL!!!!!!!!!!!!!!!!!!\n");
                 break;
             }
             case OP_GETGLOBAL: {
                 fprintf(stderr, "OP_GETGLOBAL:%d, %d\n", i[0], i[1]);
+                break;
+            }
+            case OP_GETTABLE: {
+                fprintf(stderr, "OP_GETTABLE:%d, %d, %d\n", i[0], i[1], i[2]);
+                int t = lua_type(L, i[1]);
+                if (t == LUA_TTABLE){
+                    const char s = "cccccc";
+                    lua_pushlstring(L, &s, 6); 
+                    lua_gettable(L, i[1]);
+                } else {
+                    fprintf(stderr, "OP_GETTABLE:%d, %d, %d NOK!!!!\n", i[0], i[1], i[2]);
+                }
                 break;
             }
             case OP_LOADK: {
@@ -95,14 +111,19 @@ static l_run(lua_State *L) {
                 fprintf(stderr, "LUA_TNUMBER:%d\n", i[0]);
                 unsigned int upv = lua_tointeger(L, -1);
                 v = &upv;
+                lua_pop(L, 1);
                 break;
             }
             case LUA_TSTRING: {
                 fprintf(stderr, "LUA_TSTRING:%d\n", i[0]);
+                lua_pop(L, 1);
                 break;
             }
             case LUA_TTABLE: {
                 fprintf(stderr, "LUA_TTABLE:%d\n", i[0]);
+                unsigned int tv = lua_gettop(L);
+                v = &tv;
+                fprintf(stderr, "LUA_TTABLE:%d, index:%d\n", i[0], tv);
                 break;
             }
             case LUA_TFUNCTION: {
@@ -118,7 +139,6 @@ static l_run(lua_State *L) {
                 break;
             }
         }
-        lua_pop(L, 1);
         spe_in_mbox_write(context, v, 1, SPE_MBOX_ALL_BLOCKING);
     }
 

@@ -8,11 +8,13 @@ _G["cell"] = C
 
 require("spe")
 require("stringextra")
+require("debug")
 
 local dump   = string.dump
 local ord    = string.byte
 local substr = string.sub
 local push   = table.insert
+local upv    = debug.getupvalue
 
 
 local function get_bit(byte, bit)
@@ -338,11 +340,13 @@ function C:run(f)
 
         local v
         if     op == 4 then -- OP_GETUPVAL
-            v = 8877
+            local n, value = upv(self.f, ra+1)
+            v = value
+            print("OP_GETUPVAL:", ra, v, self.upvalues[ra+1])
         elseif op == 5 then -- OP_GETGLOBAL
             local k = self.constants[ra+1]
-            print("OP_GETGLOBAL", k)
             v = _G[k]
+            print("OP_GETGLOBAL:", k, v)
         end
         spe.spe_in_mbox_write(spe_c, v);
 
